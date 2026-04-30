@@ -110,9 +110,7 @@ The following work is planned for Module 24:
 
 - [tx_childcare_eda_baseline.ipynb](tx_childcare_eda_baseline.ipynb) — Full EDA and baseline model notebook covering data collection (Sections 1–5), feature engineering (Section 6), data cleaning (Section 7), exploratory data analysis (Section 8), and Ridge Regression baseline (Section 9)
 
----
-
-#### Notebook Structure
+##### Notebook Structure
 
 ```
 0.  Setup
@@ -144,9 +142,7 @@ The following work is planned for Module 24:
 11. Summary and Next Steps
 ```
 
----
-
-#### Project Structure
+##### Project Structure
 
 ```
 ucbmlai-a201-tx-childcare-baseline/
