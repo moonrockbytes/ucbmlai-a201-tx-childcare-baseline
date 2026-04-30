@@ -1,4 +1,4 @@
-### Do Texas Childcare Inspection Records Reflect Family Experience?
+### Applying Machine Learning to Test Whether Texas Childcare Inspections Reflect Family Experience
 
 **Rakesh Chandrasekaran**
 
