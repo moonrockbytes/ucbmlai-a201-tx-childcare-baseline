@@ -56,7 +56,7 @@ If inspection outcomes (deficiency counts, deficiency rates, corrective actions)
 - Two candidate features (HAS_ADVERSE_ACTION, WAS_TEMP_CLOSED) were zero-variance after filtering and excluded from modelling
 
 **Data Cleaning (Section 7)**
-- Missing values imputed using column medians (YEARS_IN_OPERATION: 24 missing values)
+- Missing values imputed using column medians (YEARS_IN_OPERATION: 24 missing values); ACCEPTS_SUBSIDIES non-Y/N values mapped to 0
 - No duplicate center records found after Google Places deduplication in Section 5
 - Outliers retained — all extreme values represent legitimate operational variation; Ridge Regression is robust to outliers through its L2 penalty
 
@@ -70,7 +70,7 @@ If inspection outcomes (deficiency counts, deficiency rates, corrective actions)
 **Baseline Model (Section 9)**
 - **Evaluation Metric:** RMSE — chosen because it is in the same units as the target (star rating points), making results directly interpretable; R² is structurally suppressed by the compressed target range and is not the primary metric
 - **Naive Baseline:** DummyRegressor (predict mean) — RMSE 0.6852, establishes the performance floor
-- **Model Comparison:** Ridge, Lasso, ElasticNet, and Random Forest compared with GridSearchCV on 5-fold cross-validation; Ridge selected for marginal RMSE advantage, stability under multicollinearity, and full coefficient retention for SHAP analysis in Module 24
+- **Model Comparison:** Linear Regression, Ridge, Lasso, and ElasticNet compared with GridSearchCV on 5-fold cross-validation; Ridge selected for marginal RMSE advantage, stability under multicollinearity, and full coefficient retention for SHAP analysis in Module 24
 - **Polynomial Analysis:** Degree 2 (RMSE 0.6782) and degree 3 (RMSE 0.7423) both worse than linear (RMSE 0.6705) — linear features confirmed as sufficient
 - **Ridge Baseline:** RMSE 0.6707, MAE 0.4509, R² 0.0322, best alpha = 100 (GridSearchCV)
 
