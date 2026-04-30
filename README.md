@@ -6,7 +6,7 @@
 
 #### Executive Summary
 
-Texas licenses more than 13,000 childcare facilities statewide. Each facility is inspected by the Health and Human Services Commission (HHSC), producing a public record of deficiencies, corrective actions, and capacity information. Families choosing a childcare center also leave Google reviews that aggregate into a public star rating. This project asks whether those two signals agree.
+Texas licenses more than 15,000 childcare facilities statewide. Each facility is inspected by the Health and Human Services Commission (HHSC), producing a public record of deficiencies, corrective actions, and capacity information. Families choosing a childcare center also leave Google reviews that aggregate into a public star rating. This project asks whether those two signals agree.
 
 Using 2,468 active licensed childcare centers across the five largest Texas cities — Austin, Dallas, Fort Worth, Houston, and San Antonio — a Ridge Regression baseline model was trained to predict Google star ratings from 15 HHSC regulatory features. The model explains only 3% of the variance in Google ratings (R² = 0.032, RMSE = 0.671 vs a naive baseline of 0.685). All 15 regulatory features show weak negative correlations with Google ratings (range: -0.22 to -0.02), and no linear structure is visible in any feature-vs-rating scatter plot.
 
@@ -24,23 +24,22 @@ Childcare quality is a critical public health and child development issue. Paren
 
 **Do Texas HHSC regulatory compliance records predict the Google star ratings that families assign to licensed childcare centers in the five largest Texas cities?**
 
-If inspection outcomes (deficiency counts, deficiency rates, corrective actions) systematically predict lower Google ratings, regulatory data is a useful quality proxy for families. If they do not, a second question follows: can the review text itself — the words families use — predict ratings more accurately than the inspection record?
-
 ---
 
 #### Data Sources
 
-**Texas HHSC Licensed Childcare Operations** (`hhsc_data.csv`)
-- Source: Texas Health and Human Services Commission public data portal
-- 13,000+ statewide licensed childcare operations (all types, all status)
-- Filtered to: 5 target cities, active centers (OPERATION_STATUS = Y), childcare operation types only
-- Fields used: deficiency counts by severity tier, total inspections, total assessments, total capacity, years in operation, accreditation status, subsidy acceptance, corrective action flags
+**Source 1 — Texas HHSC Licensed Childcare Operations** (`hhsc_data.csv`)
+- Direct download: `https://data.texas.gov/views/bc5r-88dy/rows.csv?accessType=DOWNLOAD`
+- 15,141 statewide licensed childcare operations (all types, all status)
+- Filtered to active licensed centers across Austin, Houston, San Antonio, Dallas, and Fort Worth
+- Features used: inspection violation counts by severity level, total licensed capacity, total inspections conducted, years in continuous operation, accreditation status, subsidy acceptance status, and flags for corrective action, adverse action, and temporary closure
+- These features serve as the inputs to Model 1
 
-**Google Places API** (fetched via `places/searchText` and `place/details`)
-- Matched each HHSC center to its Google Places listing using fuzzy name matching (token_sort_ratio) and geographic proximity
+**Source 2 — Google Places API**
+- Each HHSC center matched to its Google Places listing using the `findplacefromtext` endpoint by name and city; details fetched via the `place/details` endpoint
 - 2,468 centers matched at high or medium confidence with at least one Google review
-- Fields used: Google star rating (target variable), up to 5 review texts per center (Model 2 input)
-- 42,268 reviews total; median 77 words per review
+- Google star rating (1–5 scale) serves as the labeled output for both models; review text serves as the input to Model 2
+- 42,268 reviews collected; median 77 words per review
 
 ---
 
@@ -56,7 +55,7 @@ If inspection outcomes (deficiency counts, deficiency rates, corrective actions)
 - Two candidate features (HAS_ADVERSE_ACTION, WAS_TEMP_CLOSED) were zero-variance after filtering and excluded from modelling
 
 **Data Cleaning (Section 7)**
-- Missing values imputed using column medians (YEARS_IN_OPERATION: 24 missing values); ACCEPTS_SUBSIDIES non-Y/N values mapped to 0
+- Missing values imputed using column medians (YEARS_IN_OPERATION: 24 missing values); centers with unknown subsidy status treated as not accepting subsidies
 - No duplicate center records found after Google Places deduplication in Section 5
 - Outliers retained — all extreme values represent legitimate operational variation; Ridge Regression is robust to outliers through its L2 penalty
 
@@ -99,7 +98,7 @@ The following work is planned for Module 24:
 
 1. **Model 1 — Final:** XGBoost regressor with hyperparameter tuning and SHAP value analysis on the same 15 regulatory features to identify which features drive predictions and whether direction is consistent across cities.
 
-2. **Model 2 — Review Text:** TF-IDF vectorisation of 42,268 review texts followed by Ridge or Lasso regression on the same Google star rating target. This tests whether the words families use are more predictive than inspection records.
+2. **Model 2 — Review Text:** TF-IDF vectorisation of 42,268 review texts followed by Ridge Regression on the same Google star rating target. This tests whether the words families use are more predictive than inspection records.
 
 3. **Direct Comparison:** Both models evaluated on the same 20% holdout test set using RMSE, MAE, and R², enabling a like-for-like comparison of regulatory data versus family language as quality signals.
 
@@ -110,6 +109,105 @@ The following work is planned for Module 24:
 #### Outline of Project
 
 - [tx_childcare_eda_baseline.ipynb](tx_childcare_eda_baseline.ipynb) — Full EDA and baseline model notebook covering data collection (Sections 1–5), feature engineering (Section 6), data cleaning (Section 7), exploratory data analysis (Section 8), and Ridge Regression baseline (Section 9)
+
+---
+
+#### Notebook Structure
+
+```
+0.  Setup
+1.  Download HHSC Data
+2.  Google Places Matching
+3.  Match Quality Validation
+4.  Fetch Ratings and Reviews
+5.  Coverage Assessment
+6.  Feature Engineering
+7.  Data Overview and Cleaning
+8.  Exploratory Data Analysis
+    8.1  Target Variable — Google Star Rating
+    8.2  Regulatory Feature Distributions
+    8.3  Feature Correlations with Google Rating
+    8.4  Scatter Plots — Regulatory Features vs Google Rating
+    8.5  Outlier Analysis
+    8.6  Review Text Overview (Model 2 Input Data)
+    8.7  EDA Summary and Interpretation
+9.  Baseline Model (Model 1)
+    9.1  Prepare Model Data
+    9.2  Naive Baseline
+    9.3  Model Comparison with GridSearchCV
+    9.4  Polynomial Analysis
+    9.5  Ridge Regression Diagnostics
+         9.5.1  Performance Summary
+         9.5.2  Predicted vs Actual Plot
+         9.5.3  Feature Coefficient Plot
+10. Export Datasets
+11. Summary and Next Steps
+```
+
+---
+
+#### Project Structure
+
+```
+ucbmlai-a201-tx-childcare-baseline/
+├── tx_childcare_eda_baseline.ipynb   # Main notebook
+├── README.md
+├── .gitignore
+├── images/                           # All plots saved by the notebook
+│   ├── coverage_assessment.png
+│   ├── match_quality_validation.png
+│   ├── eda_8_1_target_distribution.png
+│   ├── eda_8_2_deficiency_counts.png
+│   ├── eda_8_2_rate_scale_features.png
+│   ├── eda_8_2_binary_features.png
+│   ├── eda_8_3_correlation_heatmap.png
+│   ├── eda_8_4_scatter_deficiency_counts.png
+│   ├── eda_8_4_scatter_rate_scale.png
+│   ├── eda_8_5_outlier_analysis.png
+│   ├── eda_8_6_review_text_overview.png
+│   ├── model_9_3_comparison_rmse.png
+│   ├── model_9_4_polynomial_analysis.png
+│   ├── model_9_5_2_predicted_vs_actual.png
+│   └── model_9_5_3_feature_coefficients.png
+├── data/
+│   ├── raw/                          # Not tracked — downloaded at runtime
+│   │   ├── hhsc_data.csv
+│   │   ├── place_ids.json
+│   │   └── place_details.json
+│   └── processed/                    # Not tracked — generated by notebook
+│       ├── df_matched_rated.pkl
+│       ├── df_cleaned.pkl
+│       ├── model1_dataset.csv
+│       └── model2_reviews.csv
+```
+
+---
+
+#### Setup Instructions
+
+**Prerequisites:** Python 3.9+, Jupyter Notebook or JupyterLab, and a Google Places API key.
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/moonrockbytes/ucbmlai-a201-tx-childcare-baseline.git
+cd ucbmlai-a201-tx-childcare-baseline
+```
+
+**2. Install dependencies**
+```bash
+pip install pandas numpy matplotlib seaborn requests rapidfuzz scikit-learn python-dotenv
+```
+
+**3. Create a `.env` file in the project root**
+```
+GOOGLE_API_KEY=your_google_places_api_key_here
+CAPSTONE_BASE_DIR=/path/to/ucbmlai-a201-tx-childcare-baseline
+```
+
+**4. Run the notebook**
+
+- To run the full pipeline from scratch, execute all cells from Section 0 onwards. Sections 1–3 will call the Google Places API and HHSC data portal.
+- To skip data extraction and resume from saved data, run Section 0 first, then run the reload checkpoint cell at the top of Section 6. This loads `df_matched_rated.pkl` from `data/processed/`.
 
 ---
 
