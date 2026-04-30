@@ -77,6 +77,13 @@ Childcare quality is a critical public health and child development issue. Paren
 
 #### Results
 
+**EDA Findings**
+- All 15 regulatory features show weak negative correlations with Google rating (range: -0.22 to -0.02) — no single inspection measure is a meaningful predictor of family ratings
+- No linear structure is visible in any of the 12 continuous feature vs rating scatter plots across all five cities
+- Google ratings are heavily concentrated between 4.5 and 5.0 (61.5% of centers), with a standard deviation of 0.573 — this positivity bias structurally limits how much any model can explain
+
+**Baseline Model Performance**
+
 | Model | RMSE | MAE | R² |
 |---|---|---|---|
 | Naive baseline (predict mean) | 0.6852 | 0.4759 | -0.0102 |
